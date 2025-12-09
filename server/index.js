@@ -1,43 +1,40 @@
-// * Module Imports
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
 
-// * Controller Imports
+// * Import Controllers
 const { register, login } = require('./src/controllers/auth');
-const { createPost, getMyPosts, deletePost } = require('./src/controllers/posts');
-
-// * Middleware Imports
+const { createPost, getMyPosts, getOnePost, updatePost, deletePost } = require('./src/controllers/posts');
+// * Import Middleware
 const checkAuth = require('./src/middleware/checkAuth');
 
-// * Environment Configuration
+// * Load environment variables
 dotenv.config();
 
-// * Initialize Express App
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// * Global Middlewares
+// * Middleware setup
 app.use(cors()); // * Enable Cross-Origin Resource Sharing
-app.use(express.json()); // * Enable JSON body parsing
+app.use(express.json()); // * Parse incoming JSON payloads
 
-// --- API Endpoints ---
-
-// * 1. Authentication Routes
+// * --- Authentication Routes ---
 app.post('/auth/register', register);
 app.post('/auth/login', login);
 
-// * 2. Protected Post Routes (Require checkAuth Middleware)
-app.get('/posts', checkAuth, getMyPosts);
-app.post('/posts', checkAuth, createPost);
-app.delete('/posts/:id', checkAuth, deletePost);
+// * --- Post Management Routes (All require checkAuth middleware) ---
+app.get('/posts', checkAuth, getMyPosts); // * Get all posts for the authenticated user
+app.get('/posts/:id', checkAuth, getOnePost); // * Get a single post by ID
+app.post('/posts', checkAuth, createPost); // * Create a new post
+app.put('/posts/:id', checkAuth, updatePost); // * Update an existing post by ID
+app.delete('/posts/:id', checkAuth, deletePost); // * Delete a post by ID
 
-// * 3. Root Endpoint (Health Check)
+// * --- Health Check Route ---
 app.get('/', (req, res) => {
   res.json({ message: 'Server is working' });
 });
 
-// * Start Server Listener
+// * Start the server
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
